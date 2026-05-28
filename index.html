@@ -1,0 +1,95 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Local AI Search</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 40px auto;
+            padding: 0 20px;
+            background: #f9f9f9;
+            color: #333;
+        }
+        h1 { text-align: center; }
+        .search-box {
+            display: flex;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+        input {
+            flex: 1;
+            padding: 12px;
+            font-size: 16px;
+            border: 1px solid #ccc;
+            border-radius: 4px;
+        }
+        button {
+            padding: 12px 24px;
+            font-size: 16px;
+            background: #007bff;
+            color: white;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+        }
+        button:hover { background: #0056b3; }
+        #output {
+            background: white;
+            padding: 20px;
+            border: 1px solid #ddd;
+            border-radius: 4px;
+            min-height: 100px;
+            white-space: pre-wrap;
+            line-height: 1.6;
+        }
+    </style>
+</head>
+<body>
+    <h1>Local AI Search Engine</h1>
+    <div class="search-box">
+        <input type="text" id="query" placeholder="Ask anything...">
+        <button onclick="doSearch()">Search</button>
+    </div>
+    <div id="output">Results will appear here...</div>
+
+    <script>
+        // main search trigger
+        async function doSearch() {
+            const q = document.getElementById('query').value;
+            const out = document.getElementById('output');
+            
+            // stop if query is empty
+            if (!q.trim()) return;
+
+            // show loading text
+            out.innerText = "Searching & thinking...";
+
+            try {
+                // fetch backend stream API
+                const res = await fetch(`/search?q=${encodeURIComponent(q)}`);
+                const reader = res.body.getReader();
+                const decoder = new TextDecoder();
+                
+                // clear loading text
+                out.innerText = ""; 
+
+                // loop to read stream chunks
+                while (true) {
+                    const { value, done } = await reader.read();
+                    if (done) break;
+                    
+                    // decode chunk & append
+                    const chunk = decoder.decode(value);
+                    out.innerText += chunk;
+                }
+            } catch (err) {
+                // display errors
+                out.innerText = "Error: " + err.message;
+            }
+        }
+    </script>
+</body>
+</html>
