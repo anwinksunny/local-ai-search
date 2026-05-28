@@ -6,6 +6,12 @@ No paid API keys are required.
 
 ---
 
+## Demo
+
+![Local AI Search demo](assets/demo.svg)
+
+---
+
 ## Features
 
 - Live AI answer streaming in the browser.

@@ -1,0 +1,45 @@
+<svg width="1200" height="760" viewBox="0 0 1200 760" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-labelledby="title desc">
+  <title id="title">Local AI Search demo</title>
+  <desc id="desc">A mock screenshot of the Local AI Search web interface with a search box, related image cards, and a streamed AI answer.</desc>
+  <rect width="1200" height="760" fill="#F7F8FA"/>
+  <rect x="190" y="64" width="820" height="632" rx="18" fill="#FFFFFF" stroke="#E5E7EB"/>
+
+  <text x="250" y="132" fill="#111827" font-family="Arial, Helvetica, sans-serif" font-size="36" font-weight="700">AI Search</text>
+
+  <rect x="250" y="166" width="520" height="58" rx="10" fill="#FFFFFF" stroke="#D1D5DB"/>
+  <text x="274" y="202" fill="#6B7280" font-family="Arial, Helvetica, sans-serif" font-size="18">latest open source AI tools</text>
+  <rect x="790" y="166" width="160" height="58" rx="10" fill="#111827"/>
+  <text x="842" y="202" fill="#FFFFFF" font-family="Arial, Helvetica, sans-serif" font-size="18" font-weight="700">Search</text>
+
+  <rect x="250" y="252" width="62" height="36" rx="8" fill="#F3F4F6"/>
+  <text x="271" y="276" fill="#111827" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700">All</text>
+  <text x="337" y="276" fill="#6B7280" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700">Images</text>
+  <line x1="250" y1="306" x2="950" y2="306" stroke="#E5E7EB"/>
+
+  <text x="250" y="348" fill="#6B7280" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" letter-spacing="1">RELATED IMAGES</text>
+  <g>
+    <rect x="250" y="370" width="150" height="94" rx="10" fill="#DDE8F0"/>
+    <circle cx="326" cy="417" r="24" fill="#8DB3C7"/>
+    <path d="M250 464L305 418L348 448L378 428L400 446V464H250Z" fill="#6890A6"/>
+
+    <rect x="416" y="370" width="150" height="94" rx="10" fill="#E6EADF"/>
+    <rect x="446" y="394" width="90" height="46" rx="8" fill="#A9B88C"/>
+    <circle cx="520" cy="410" r="12" fill="#F3C86A"/>
+
+    <rect x="582" y="370" width="150" height="94" rx="10" fill="#EFE4DF"/>
+    <path d="M610 438C634 394 680 390 704 438" stroke="#B47C69" stroke-width="16" stroke-linecap="round"/>
+    <circle cx="657" cy="408" r="12" fill="#DFA78F"/>
+
+    <rect x="748" y="370" width="150" height="94" rx="10" fill="#E6E3F1"/>
+    <rect x="782" y="394" width="82" height="44" rx="7" fill="#8B83B9"/>
+    <path d="M796 430L818 411L840 430" stroke="#FFFFFF" stroke-width="6" stroke-linecap="round" stroke-linejoin="round"/>
+  </g>
+
+  <text x="250" y="516" fill="#6B7280" font-family="Arial, Helvetica, sans-serif" font-size="15" font-weight="700" letter-spacing="1">AI ANSWER</text>
+  <rect x="250" y="538" width="700" height="112" rx="12" fill="#FFFFFF" stroke="#E5E7EB"/>
+  <rect x="278" y="566" width="424" height="12" rx="6" fill="#111827"/>
+  <rect x="278" y="596" width="614" height="10" rx="5" fill="#9CA3AF"/>
+  <rect x="278" y="622" width="548" height="10" rx="5" fill="#D1D5DB"/>
+  <circle cx="908" cy="516" r="9" fill="#111827"/>
+  <path d="M908 502A14 14 0 1 1 895 521" stroke="#D1D5DB" stroke-width="4" stroke-linecap="round"/>
+</svg>
