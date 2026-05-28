@@ -3,6 +3,8 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <!-- hide referrer to bypass website hotlink protection -->
+    <meta name="referrer" content="no-referrer">
     <title>Local AI Search</title>
     <!-- import md parser -->
     <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
@@ -40,7 +42,7 @@
         .search-box {
             display: flex;
             gap: 12px;
-            margin-bottom: 32px;
+            margin-bottom: 24px;
         }
         input {
             flex: 1;
@@ -79,6 +81,79 @@
             background-color: #374151;
         }
 
+        /* Tabs styling */
+        .tabs {
+            display: flex;
+            gap: 8px;
+            margin-bottom: 24px;
+            border-bottom: 1px solid #e5e7eb;
+            padding-bottom: 8px;
+        }
+        .tab-btn {
+            background: none;
+            color: #6b7280;
+            padding: 8px 16px;
+            font-size: 14px;
+            font-weight: 500;
+            border-radius: 6px;
+            border: none;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .tab-btn.active {
+            background-color: #f3f4f6;
+            color: #111827;
+        }
+        .tab-btn:hover:not(.active) {
+            color: #374151;
+            background-color: #f9fafb;
+        }
+
+        /* Section titles */
+        .section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #6b7280;
+            margin-bottom: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: flex;
+            align-items: center;
+        }
+
+        /* separate image section */
+        .image-section {
+            background-color: #ffffff;
+            border: 1px solid #f3f4f6;
+            border-radius: 12px;
+            padding: 24px;
+            margin-bottom: 24px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.04);
+        }
+        .image-gallery {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 12px;
+        }
+        .image-card {
+            position: relative;
+            border-radius: 8px;
+            overflow: hidden;
+            background-color: #f3f4f6;
+            aspect-ratio: 16 / 10;
+            border: 1px solid #e5e7eb;
+        }
+        .image-card img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+        }
+        .image-card img:hover {
+            transform: scale(1.03);
+        }
+
         /* clean output card */
         #output {
             background-color: #ffffff;
@@ -89,6 +164,7 @@
             box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
             font-size: 15px;
             color: #374151;
+            margin-bottom: 24px;
         }
 
         /* style headings in output */
@@ -120,6 +196,71 @@
             color: #9ca3af;
             font-style: italic;
         }
+
+        /* small loading spinner */
+        .spinner {
+            display: inline-block;
+            width: 14px;
+            height: 14px;
+            border: 2px solid #e5e7eb;
+            border-top-color: #1f2937;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-left: 10px;
+        }
+
+        @keyframes spin {
+            to { transform: rotate(360deg); }
+        }
+
+        /* pulsating skeleton */
+        .skeleton {
+            display: flex;
+            flex-direction: column;
+            gap: 12px;
+        }
+        .skeleton-line {
+            height: 14px;
+            background-color: #f3f4f6;
+            border-radius: 4px;
+            animation: pulse 1.5s infinite ease-in-out;
+        }
+        .skeleton-line.short { width: 40%; }
+        .skeleton-line.medium { width: 75%; }
+        .skeleton-line.long { width: 100%; }
+
+        @keyframes pulse {
+            0% { opacity: 0.6; }
+            50% { opacity: 1; }
+            100% { opacity: 0.6; }
+        }
+
+        /* load more button */
+        .load-more-btn {
+            display: block;
+            width: 100%;
+            margin-top: 24px;
+            padding: 12px;
+            background-color: #ffffff;
+            color: #374151;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            font-size: 14px;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .load-more-btn:hover {
+            background-color: #f9fafb;
+            border-color: #d1d5db;
+        }
+
+        /* responsive grid for mobile */
+        @media (max-width: 640px) {
+            .image-gallery {
+                grid-template-columns: repeat(2, 1fr);
+            }
+        }
     </style>
 </head>
 <body>
@@ -129,22 +270,219 @@
             <input type="text" id="query" placeholder="Search the web...">
             <button onclick="doSearch()">Search</button>
         </div>
-        <div id="output">
-            <span class="loading">Enter a query to begin...</span>
+
+        <!-- tab selectors -->
+        <div class="tabs">
+            <button id="tab-all" class="tab-btn active" onclick="switchTab('all')">All</button>
+            <button id="tab-images" class="tab-btn" onclick="switchTab('images')">Images</button>
+        </div>
+        
+        <!-- TAB CONTENT: ALL -->
+        <div id="tab-content-all">
+            <!-- 8 Related images are loaded at the top -->
+            <div id="related-images-section" class="image-section" style="display: none;">
+                <h2 class="section-title">Related Images</h2>
+                <div id="related-images-gallery" class="image-gallery"></div>
+            </div>
+
+            <!-- AI Answer sits below the image strip -->
+            <div id="answer-section">
+                <h2 class="section-title">
+                    AI Answer
+                    <span id="text-spinner" class="spinner" style="display: none;"></span>
+                </h2>
+                <div id="output">
+                    <span class="loading">Enter a query to begin...</span>
+                </div>
+            </div>
+        </div>
+
+        <!-- TAB CONTENT: IMAGES -->
+        <div id="tab-content-images" style="display: none;">
+            <div class="image-section">
+                <h2>All Images</h2>
+                <div id="all-images-gallery" class="image-gallery"></div>
+                <button id="load-more-btn" class="load-more-btn" onclick="loadMoreImages()" style="display: none;">Load More Images</button>
+            </div>
         </div>
     </div>
 
     <script>
+        let currentQuery = "";
+        let currentImageOffset = 0;
+        let activeTab = "all";
+
+        // switch active view tab
+        function switchTab(tabName) {
+            activeTab = tabName;
+            
+            const tabAll = document.getElementById('tab-all');
+            const tabImages = document.getElementById('tab-images');
+            const contentAll = document.getElementById('tab-content-all');
+            const contentImages = document.getElementById('tab-content-images');
+
+            if (tabName === 'all') {
+                tabAll.classList.add('active');
+                tabImages.classList.remove('active');
+                contentAll.style.display = 'block';
+                contentImages.style.display = 'none';
+            } else {
+                tabAll.classList.remove('active');
+                tabImages.classList.add('active');
+                contentAll.style.display = 'none';
+                contentImages.style.display = 'block';
+                
+                // load 20-image list if active query exists
+                if (currentQuery.trim()) {
+                    initImagesView();
+                }
+            }
+        }
+
+        // fetch 8 related images for All tab
+        async function fetchRelatedImages(q) {
+            const section = document.getElementById('related-images-section');
+            const gallery = document.getElementById('related-images-gallery');
+            
+            gallery.innerHTML = "";
+            section.style.display = "none";
+            
+            try {
+                const res = await fetch(`/images?q=${encodeURIComponent(q)}&limit=8&offset=0`);
+                const data = await res.json();
+                
+                if (data && data.length > 0) {
+                    section.style.display = "block";
+                    data.forEach(img => {
+                        const card = document.createElement('div');
+                        card.className = 'image-card';
+                        
+                        const element = document.createElement('img');
+                        element.src = img.thumbnail_url || img.image_url;
+                        element.alt = img.title;
+                        
+                        // hide image card if loading fails due to dead links
+                        element.onerror = () => { card.style.display = "none"; };
+                        element.onclick = () => window.open(img.image_url, '_blank');
+                        
+                        card.appendChild(element);
+                        gallery.appendChild(card);
+                    });
+                }
+            } catch (err) {
+                console.log("images err:", err);
+            }
+        }
+
+        // initialize 20 images view
+        async function initImagesView() {
+            const gallery = document.getElementById('all-images-gallery');
+            const loadMore = document.getElementById('load-more-btn');
+            
+            gallery.innerHTML = '<span class="loading">Loading images...</span>';
+            loadMore.style.display = "none";
+            currentImageOffset = 0; 
+
+            await fetchAndAppendImages(currentQuery, 20, 0, true);
+        }
+
+        // click load more images
+        async function loadMoreImages() {
+            const loadMore = document.getElementById('load-more-btn');
+            loadMore.innerText = "Loading...";
+            loadMore.disabled = true;
+
+            await fetchAndAppendImages(currentQuery, 20, currentImageOffset, false);
+            
+            loadMore.innerText = "Load More Images";
+            loadMore.disabled = false;
+        }
+
+        // load and display grid images
+        async function fetchAndAppendImages(q, limit, offset, isFresh) {
+            const gallery = document.getElementById('all-images-gallery');
+            const loadMore = document.getElementById('load-more-btn');
+            
+            try {
+                const res = await fetch(`/images?q=${encodeURIComponent(q)}&limit=${limit}&offset=${offset}`);
+                const data = await res.json();
+                
+                if (isFresh) {
+                    gallery.innerHTML = "";
+                }
+                
+                if (data && data.length > 0) {
+                    data.forEach(img => {
+                        const card = document.createElement('div');
+                        card.className = 'image-card';
+                        
+                        const element = document.createElement('img');
+                        element.src = img.thumbnail_url || img.image_url;
+                        element.alt = img.title;
+                        element.title = img.title;
+                        
+                        // hide image card if loading fails due to dead links
+                        element.onerror = () => { card.style.display = "none"; };
+                        element.onclick = () => window.open(img.image_url, '_blank');
+                        
+                        card.appendChild(element);
+                        gallery.appendChild(card);
+                    });
+                    
+                    // increment offset
+                    currentImageOffset += data.length;
+                    
+                    // show button if complete page returned
+                    if (data.length === limit) {
+                        loadMore.style.display = "block";
+                    } else {
+                        loadMore.style.display = "none";
+                    }
+                } else {
+                    if (isFresh) {
+                        gallery.innerHTML = '<span class="loading">No images found.</span>';
+                    }
+                    loadMore.style.display = "none";
+                }
+            } catch (err) {
+                console.log("image fetch error:", err);
+                if (isFresh) {
+                    gallery.innerHTML = '<span class="loading">Error loading images.</span>';
+                }
+            }
+        }
+
         // main search trigger
         async function doSearch() {
             const q = document.getElementById('query').value;
             const out = document.getElementById('output');
+            const spinner = document.getElementById('text-spinner');
             
             // stop if query is empty
             if (!q.trim()) return;
 
-            // show loading text
-            out.innerHTML = '<span class="loading">Searching & thinking...</span>';
+            // save query state
+            currentQuery = q;
+
+            // start background image fetch for the 8 related images at the top
+            fetchRelatedImages(q);
+
+            // trigger fresh 20-image load if user is inside the Images tab
+            if (activeTab === 'images') {
+                initImagesView();
+            }
+
+            // show header spinner
+            spinner.style.display = "inline-block";
+
+            // show skeleton while thinking
+            out.innerHTML = `
+                <div class="skeleton">
+                    <div class="skeleton-line long"></div>
+                    <div class="skeleton-line medium"></div>
+                    <div class="skeleton-line short"></div>
+                </div>
+            `;
 
             try {
                 // fetch backend stream API
@@ -171,6 +509,9 @@
             } catch (err) {
                 // display errors
                 out.innerHTML = `<span style="color: #dc2626;">Error: ${err.message}</span>`;
+            } finally {
+                // hide spinner when stream completes
+                spinner.style.display = "none";
             }
         }
     </script>

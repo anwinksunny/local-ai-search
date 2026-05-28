@@ -4,7 +4,7 @@ from fastapi import FastAPI, Query
 from fastapi.responses import HTMLResponse, StreamingResponse
 
 # import local functions
-from search_engine import get_web_ctx
+from search_engine import get_web_ctx, get_web_images
 from ai_model import ask_ai_stream
 
 # init app
@@ -18,6 +18,20 @@ def home():
         with open("index.html", "r", encoding="utf-8") as f:
             return f.read()
     return "<h1>Error: index.html not found</h1>"
+
+# image fetch with pagination support
+@app.get("/images")
+def get_images(
+    q: str = Query(..., description="image query"),
+    limit: int = 8,
+    offset: int = 0
+):
+    # pull total elements required
+    total_needed = offset + limit
+    results = get_web_images(q, max_images=total_needed)
+    
+    # slice list to return requested page
+    return results[offset:total_needed]
 
 # stream search response to ui
 @app.get("/search")
