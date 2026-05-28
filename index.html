@@ -4,56 +4,135 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Local AI Search</title>
+    <!-- import md parser -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
     <style>
-        body {
-            font-family: Arial, sans-serif;
-            max-width: 800px;
-            margin: 40px auto;
-            padding: 0 20px;
-            background: #f9f9f9;
-            color: #333;
+        /* base reset & clean font stack */
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
         }
-        h1 { text-align: center; }
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            background-color: #fcfcfc;
+            color: #1f2937;
+            line-height: 1.6;
+        }
+        
+        /* central container */
+        .container {
+            max-width: 680px;
+            margin: 80px auto;
+            padding: 0 20px;
+        }
+
+        /* neat, minimal title */
+        h1 {
+            font-size: 28px;
+            font-weight: 700;
+            letter-spacing: -0.5px;
+            margin-bottom: 24px;
+            color: #111827;
+        }
+
+        /* unified search layout */
         .search-box {
             display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
+            gap: 12px;
+            margin-bottom: 32px;
         }
         input {
             flex: 1;
-            padding: 12px;
-            font-size: 16px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
+            padding: 14px 16px;
+            font-size: 15px;
+            font-family: inherit;
+            border: 1px solid #e5e7eb;
+            border-radius: 8px;
+            background-color: #ffffff;
+            color: #1f2937;
+            transition: all 0.2s;
         }
+        input:focus {
+            outline: none;
+            border-color: #9ca3af;
+            box-shadow: 0 0 0 3px rgba(156, 163, 175, 0.1);
+        }
+        input::placeholder {
+            color: #9ca3af;
+        }
+
+        /* sleek, dark minimal button */
         button {
-            padding: 12px 24px;
-            font-size: 16px;
-            background: #007bff;
-            color: white;
+            padding: 14px 28px;
+            font-size: 15px;
+            font-weight: 500;
+            font-family: inherit;
+            background-color: #111827;
+            color: #ffffff;
             border: none;
-            border-radius: 4px;
+            border-radius: 8px;
             cursor: pointer;
+            transition: background-color 0.15s;
         }
-        button:hover { background: #0056b3; }
+        button:hover {
+            background-color: #374151;
+        }
+
+        /* clean output card */
         #output {
-            background: white;
-            padding: 20px;
-            border: 1px solid #ddd;
-            border-radius: 4px;
-            min-height: 100px;
-            white-space: pre-wrap;
-            line-height: 1.6;
+            background-color: #ffffff;
+            border: 1px solid #f3f4f6;
+            border-radius: 12px;
+            padding: 28px;
+            min-height: 120px;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.05), 0 2px 4px -2px rgba(0, 0, 0, 0.05);
+            font-size: 15px;
+            color: #374151;
+        }
+
+        /* style headings in output */
+        #output h2, #output h3 {
+            font-size: 18px;
+            font-weight: 650;
+            color: #111827;
+            margin-top: 24px;
+            margin-bottom: 12px;
+        }
+        #output h2:first-of-type {
+            margin-top: 0;
+        }
+
+        /* style list markers & spacing */
+        #output ul, #output ol {
+            margin-left: 20px;
+            margin-bottom: 16px;
+        }
+        #output li {
+            margin-bottom: 6px;
+        }
+        #output p {
+            margin-bottom: 16px;
+        }
+
+        /* dynamic loading text state */
+        .loading {
+            color: #9ca3af;
+            font-style: italic;
         }
     </style>
 </head>
 <body>
-    <h1>Local AI Search Engine</h1>
-    <div class="search-box">
-        <input type="text" id="query" placeholder="Ask anything...">
-        <button onclick="doSearch()">Search</button>
+    <div class="container">
+        <h1>AI Search</h1>
+        <div class="search-box">
+            <input type="text" id="query" placeholder="Search the web...">
+            <button onclick="doSearch()">Search</button>
+        </div>
+        <div id="output">
+            <span class="loading">Enter a query to begin...</span>
+        </div>
     </div>
-    <div id="output">Results will appear here...</div>
 
     <script>
         // main search trigger
@@ -65,7 +144,7 @@
             if (!q.trim()) return;
 
             // show loading text
-            out.innerText = "Searching & thinking...";
+            out.innerHTML = '<span class="loading">Searching & thinking...</span>';
 
             try {
                 // fetch backend stream API
@@ -73,8 +152,9 @@
                 const reader = res.body.getReader();
                 const decoder = new TextDecoder();
                 
-                // clear loading text
-                out.innerText = ""; 
+                // clear output & set text var
+                out.innerHTML = ""; 
+                let markdownText = "";
 
                 // loop to read stream chunks
                 while (true) {
@@ -83,11 +163,14 @@
                     
                     // decode chunk & append
                     const chunk = decoder.decode(value);
-                    out.innerText += chunk;
+                    markdownText += chunk;
+                    
+                    // render md to html
+                    out.innerHTML = marked.parse(markdownText);
                 }
             } catch (err) {
                 // display errors
-                out.innerText = "Error: " + err.message;
+                out.innerHTML = `<span style="color: #dc2626;">Error: ${err.message}</span>`;
             }
         }
     </script>

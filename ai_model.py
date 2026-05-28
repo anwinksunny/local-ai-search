@@ -1,12 +1,13 @@
 import ollama
 
-# streams response from local ollama
+# streams structured response from local ollama
 def ask_ai_stream(q, ctx):
-    # sys instructions
+    # sys instructions for structured layout
     sys_prompt = (
         "You are an AI search engine. "
         "Answer the user query based ONLY on the provided web context. "
-        "Always cite sources using [1], [2], etc."
+        "Structure your response with clear, logical headings and bullet points. "
+        "Always cite sources using inline brackets like [1], [2], etc."
     )
     # user text prompt
     user_prompt = f"Web Context:\n{ctx}\n\nQuery: {q}"
